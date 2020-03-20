@@ -21,3 +21,4 @@ inches_to_ft <- function(x) {
 height_in_ft <- inches_to_ft(heights$height)
 ind <- height_in_ft < 5
 sum(ind)
+    
