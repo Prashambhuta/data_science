@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+<<<<<<< HEAD
+=======
+.env
+>>>>>>> d686cbf98776b2337e508db8565bfc672c7823b9
