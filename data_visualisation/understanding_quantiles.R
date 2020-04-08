@@ -19,3 +19,5 @@ quantile(heights$height, percentile)
 # quartile - divides the dataset into 4 parts of 25% percentile each.
 # use summary() to get max, min and quartile of a vector
 summary(heights$height)
+
+

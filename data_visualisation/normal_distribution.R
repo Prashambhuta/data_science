@@ -10,4 +10,5 @@ x <- heights %>% filter(sex=="Male") %>% pull(height)
 # probabilitydistribution of exact height in data
 plot(prop.table(table(x)), xlab = "height", ylab = "probability")
 
+# qnorm
 
