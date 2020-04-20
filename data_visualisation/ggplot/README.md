@@ -57,25 +57,5 @@
 
 6. theme/styling
 
-## `ggplot` examples
-
-* histogram plot
-```r
-heights %>% ggplot(aes(height)) + geom_histogram()
-```
-
-* density plot
-```r
-heights %>% ggplot(aes(height)) + geom_density()
-```
-
-* scatter plot
-```r
-murders %>% ggplot(aes(x = , y = )) + geom_point() + scale_x_continuous("log10") + scale_y_log10()
-```
-* label / text plot
-```r
-murders %>% ggplot(aes(x = , y = , label = )) + geom_label() + ggtitle("Plot Title")
-
 
 
