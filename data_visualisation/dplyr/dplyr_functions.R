@@ -28,7 +28,9 @@ us_total_murder_rate_numeric <- murders %>%
     summarise(rate=sum(total)*1000000/sum(population)) %>% .$rate
 
 # check class
-class(us_total_murder_rate_numeric)
+class(us_total_murder_rate_numeric)     # it is numeric
+
+
 
 
 
