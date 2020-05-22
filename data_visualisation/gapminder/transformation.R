@@ -3,7 +3,7 @@ library(tidyverse)
 # understanding dollars per day for 1970
 gapminder <- gapminder %>% mutate(dollars_per_day = gdp/(population*365))
 
-previous_year <- 2011
+previous_year <- 1970
 country <- c("India", "China")
 
 gapminder %>% filter(year == previous_year & !is.na(gdp)) %>%
@@ -18,6 +18,6 @@ gapminder %>% filter(year == previous_year & !is.na(gdp)) %>%
     ggplot(aes(region, dollars_per_day, fill = continent)) +
     geom_boxplot() +
     theme(axis.text.x = element_text(angle=45, hjust =1)) +
-    xlab("") +
+    # xlab("") +
     scale_y_continuous(trans = "log2") +
     geom_point(show.legend = FALSE)
