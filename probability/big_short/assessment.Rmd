@@ -1,0 +1,274 @@
+---
+title: "Final Assessment PHY 125.3"
+author: "Prasham Bhuta"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+# Final Assessment - Probability
+This is the final assessment to the probability chapter of Data Science course
+at Harvardx.
+
+Loading necessary libraries.
+```{r library, echo=TRUE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(dslabs)
+```
+
+Loading the '2015 US Period Life Table `(death_prob)`' from dslabs and 
+summarising it.
+
+```{r load_data}
+data("death_prob")
+head(death_prob)
+summary(death_prob)
+```
+## The scenario
+
+Insurance company offers a 1 year term policy that pays $150000 in event of death. The premium for a 50 year old female is $1,150 yearly. 
+In event of a claim, the company forfeits the premium, and pays $150000 as agreed. The company plans to sell 1000 such insurances.
+
+Lets setup the basic parameters.
+
+```{r setting_up}
+n <- 1000
+loss_payout <- -150000
+profit_premium <- 1150
+```
+
+Lets plot age vs probability of death.
+```{r plot1}
+death_prob %>% ggplot(aes(age, prob, group = sex, color = sex)) + 
+    geom_line() +
+    ggtitle('Age vs Probability of death')
+```
+
+## Q1(a): Use `death_prob` to determine the death probability of 50 year old female.
+```{r 1a}
+death_prob %>% filter(age == 50 & sex =='Female')
+```
+## Q1(b): What is the Expected Value(E) for a 50 year old female
+```{r 1b}
+p <- 0.003193
+loss_payout*p + profit_premium*(1-p)
+```
+
+## Q1(c): Calculate the Standard Error (SE) for the same.
+```{r 1c}
+sqrt(p*(1-p))*abs(loss_payout - profit_premium)
+```
+
+## Q1(d): (E) for all 1000 policies for 50 year old females
+```{r 1d}
+En <- n*(loss_payout*p + profit_premium*(1-p))
+En
+```
+
+## Q1(e): (SE) for all 1000 policies for 50 year old females.
+```{r 1e}
+SEn <- sqrt(n*p*(1-p))*abs(loss_payout - profit_premium)
+SEn
+```
+
+## Q1(f): Using Central Limit Theorem to calculate the probability of losing money on this set of 1000 policies.
+```{r 1f}
+pnorm(0, En, SEn)
+```
+
+## Section 2: Lets perform similar tasks for 50 year old Male. 
+
+## Q2(a): Probability of death for a 50 year old Male
+```{r 2a}
+prob <- death_prob %>% filter(age == 50 & sex == 'Male')
+prob
+```
+## Q2(b): Suppose from 1000 policies the expected profit is to be $700000. What should be the premium?
+```{r 2b}
+# En = n * (loss*p + premium*(1-p))
+# premium = (En - n*loss*p)/(n*(1-p))
+En <- 700000
+p <- prob$prob
+premium <- (700000 - n*loss_payout*p)/(n*(1 - p))
+premium
+```
+## Q2(c): calculate the SE for n policies with previous premium amount.
+```{r 2c}
+SEn <- sqrt(n*p*(1-p))*abs(loss_payout-premium)
+SEn
+```
+## Q2(d): Using Central Limit Theorem what is the probability of losing money on 1000 policies.
+```{r 2d}
+pnorm(0, En, SEn)
+```
+
+## Section 3: An event changes the death_prob, what will be change in profit for the insurance company.
+```{r section3}
+new_p <- 0.015
+loss_payout <- -150000
+premium <- 1150
+n <- 1000
+```
+## Q3(a): What is the new expected value?
+```{r 3a}
+# E = n*(loss*new_p + premium*(1-new_p))
+En <- n*(loss_payout*new_p + premium*(1-new_p))
+En
+```
+## Q3(b): What is the new expected value?
+```{r 3b}
+# SE = sqrt(n*new_p*(1-new_p))*abs(loss-premium)
+SEn <- sqrt(n*new_p*(1-new_p))*abs(loss_payout-premium)
+SEn
+```
+
+## Q3(c): What is the probability of company losing money.
+```{r 3c}
+pnorm(0, En, SEn)
+```
+
+## Q3(d): What is the probability of losing more than 1 million $?
+```{r 3d}
+pnorm(-1000000, En, SEn)
+```
+
+## Q3(e): New death probability are as defined below, what is the lowest death probability for which chance of losing money exceed 90%?
+```{r 3e}
+p <- seq(.01, .03, .001)
+En <- n*(p*loss_payout + premium*(1-p))
+SEn <- sqrt(n*p*(1-p))*abs(loss_payout - premium)
+prob_losing_money <- pnorm(0, En, SEn)
+df <- data.frame(prob = p, losing_money = prob_losing_money)
+df %>% filter(losing_money>0.9)
+```
+## Q3(f): For the new death probabilities what is the least death probability for which the chance to lose over 1million$ exceeds 90%?
+```{r 3f}
+p <- seq(.01, .03, .0025)
+En <- n*(p*loss_payout + premium*(1-p))
+SEn <- sqrt(n*p*(1-p))*abs(loss_payout - premium)
+prob_losing_money <- pnorm(-1000000, En, SEn)
+df <- data.frame(prob = p, losing_money = prob_losing_money)
+df %>% filter(losing_money>0.9)
+```
+
+## Q4(a): Define a sampling model for n = 1000 loans, p_loss = 0.015, loss = -150000$, premium = 1150$. What is the reported profit in millions?
+
+Set the seed to 25 using following command:
+set.seed(25, sample.kind = "Rounding").
+
+```{r, warning=FALSE}
+set.seed(25, sample.kind = "Rounding")
+```
+
+```{r 4a}
+n <- 1000
+p_loss <- 0.015
+loss <- 150000
+premium <- 1150
+report <- sample(c(-1, 1), n, replace = TRUE, 
+                          prob = c(p_loss, 1-p_loss))
+profit <- 1150*sum(report == 1)/10^6
+loss <- 150000*sum(report == -1)/10^6
+profit - loss
+```
+
+## Q4(b): set the seed to 27, and run the simulation with 10000 replicates. Finally, find out what is the probability of losing 1 million $ or more?
+```{r}
+set.seed(27, sample.kind = 'Rounding')
+```
+
+
+```{r 4b}
+B <- 10000
+profits <- replicate(B, {
+    report <- sample(c(-1, 1), n, replace = TRUE, 
+                     prob = c(p_loss, 1 - p_loss))
+    profit <- 1150*sum(report == 1)/10^6
+    loss <- 150000*sum(report == -1)/10^6
+    total <- profit - loss
+})
+mean(profits <= -1)
+```
+## Q5(a): For a death prob of 0.015, the probability of losing money should be less than 5%. Calculate the premium required.
+
+Pr(S < 0) = 0.05
+
+Pr((S - En)/SEn < -En/SEn) = 0.05
+
+Pr(Z < - En/SEn) = 0.05
+
+therefore, -En/SEn = qnorm(0.05)
+
+```{r 5a}
+# -[(loss*p + premium*(1-p))*n/(sqrt(n*p*(1-p))*abs(loss-premium)) = qnorm(0.05)
+loss_payout <- -150000
+p <- 0.015
+n <- 1000
+z <- qnorm(0.05)
+
+# -(-2250000 + 985*premium)/(3.843*premium + 576570) = -1.6448
+# 2250000 - 985*premium = -6.320966*premium - 948342
+# premium = (2250000 + 948342)/(985 - 6.320966)
+premium <- (2250000 + 948342)/(985 - 6.30966)
+premium
+```
+## Q5(b): Expected profit per policy at above premium rate?
+```{r 5b}
+En <- loss_payout*p + premium*(1-p)
+En
+```
+## Q5(c): What is the expected profit for over 1000 policies?
+```{r 5c}
+En*1000
+```
+## Q5(d): Using Monte Carlo Simulation determine the probability of losing money for 10000 trials.
+```{r}
+set.seed(28, sample.kind = "Rounding")
+```
+```{r 5d}
+B <- 10000
+n <- 1000
+loss_payout <- -150000
+premium <- 3267.982
+p <- 0.015
+
+profits <- replicate(B, {
+    draws <- sample(c(loss_payout, premium), n, replace = TRUE, 
+                    prob = c(p, 1-p))
+    sum(draws)
+})
+mean(profits < 0)
+```
+
+## Section 6: The pandemic changes the probability of payout by a value between -0.01 to 0.01, using this changes calculate the profit returns.
+
+Set seed to 29.
+
+```{r}
+set.seed(29, sample.kind = "Rounding")
+```
+## Q6(a): What is the expected value for 1000 policies?
+
+```{r 6a}
+B <- 10000
+n <- 1000
+loss_payout <- -150000
+premium <- 3267.982
+
+profits <- replicate(B, {
+    p <- 0.015 + sample(seq(-0.01, 0.01, length = 100), 1)
+    draws <- sample(c(loss_payout, premium), n, replace = TRUE,
+                    prob = c(p, 1-p))
+    sum(draws)
+})
+mean(profits)
+```
+
+## Q6(b): What is the probability of losing money?
+```{r 6b}
+mean(profits < 0)
+```
+
+## Q6(c): What is the probability of losing more than 1 million $?
+```{r 6c}
+mean(profits < -1000000)
+```
